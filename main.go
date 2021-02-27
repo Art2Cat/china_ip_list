@@ -78,7 +78,7 @@ func openIpipFile() []string {
 		log.Fatal(err)
 	}
 	r4 := bufio.NewReader(f)
-	ipList := make([]string, 10)
+	ipList := make([]string, 0)
 	for {
 		line, _, err := r4.ReadLine()
 
@@ -97,7 +97,7 @@ func parseChinaIpFromApinc() []string {
 		log.Fatal(err)
 	}
 	r4 := bufio.NewReader(f)
-	ipList := make([]string, 10)
+	ipList := make([]string, 0)
 	for {
 		line, _, err := r4.ReadLine()
 
