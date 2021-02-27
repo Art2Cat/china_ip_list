@@ -35,8 +35,13 @@ func main() {
 	}
 
 	dataWriter.Flush()
+	cmd := exec.Command("git", "add", "china_ip_list.txt")
+	err = cmd.Run()
+	if err != nil {
+		log.Println(err)
+	}
 
-	cmd := exec.Command("git", "commit", "'update china_ip_list.txt'")
+	cmd = exec.Command("git", "commit", "'update china_ip_list.txt'")
 	err = cmd.Run()
 	if err != nil {
 		log.Println(err)
