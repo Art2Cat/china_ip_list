@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"log"
 	"math"
@@ -109,16 +108,11 @@ func parseChinaIpFromApinc() []string {
 		s := string(line)
 		if strings.Contains(s, "apinc") || strings.Contains(s, "|CN|ipv4|") {
 			split := strings.Split(s, `|`)
-			i, err := strconv.Atoi(split[4])
-			if err == nil {
-				fmt.Printf("%d of type %T", i, i)
-			}
+			i, _ := strconv.Atoi(split[4])
 			mask := 32 - math.Log(float64(i)/math.Log(2))
 			ip := split[3] + "/" + strconv.Itoa(int(mask))
 			ipList = append(ipList, ip)
 		}
-
-		fmt.Printf("%s \n", line)
 	}
 	return ipList
 }
