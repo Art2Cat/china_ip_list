@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"github.com/go-co-op/gocron"
 	"io"
 	"log"
 	"math"
@@ -10,6 +11,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const ApnicUrl = "http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest"
@@ -19,6 +21,13 @@ const IpipIpListFile = "ip_list.txt"
 const OutPutFile = "china_ip_list.txt"
 
 func main() {
+	s := gocron.NewScheduler(time.UTC)
+	_, _ = s.Every("1").Days().At("00:01:00").Do(taskJob)
+	s.StartAsync()
+}
+
+func taskJob() {
+	initJob()
 	apincIpList := parseChinaIpFromApinc()
 	ipipList := openIpipFile()
 	finalIpList := mergeSliceWithOutDuplicate(ipipList, apincIpList)
@@ -53,7 +62,7 @@ func main() {
 	}
 }
 
-func init() {
+func initJob() {
 	os.Remove(OutPutFile)
 	os.Remove(IpipIpListFile)
 	os.Remove(ApincIpListFile)
