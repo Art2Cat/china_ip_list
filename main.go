@@ -14,11 +14,11 @@ import (
 	"time"
 )
 
-const ApnicUrl = "http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest"
-const ApincIpListFile = "apinc_ip_list.txt"
-const IpipUrl = "https://raw.githubusercontent.com/17mon/china_ip_list/master/china_ip_list.txt"
-const IpipIpListFile = "ip_list.txt"
-const OutPutFile = "china_ip_list.txt"
+const apnicURL = "http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest"
+const apincIPListFile = "apinc_ip_list.txt"
+const ipipURL = "https://raw.githubusercontent.com/17mon/china_ip_list/master/china_ip_list.txt"
+const ipipIPListFile = "ip_list.txt"
+const outPutFile = "china_ip_list.txt"
 
 func main() {
 	s := gocron.NewScheduler(time.UTC)
@@ -28,10 +28,10 @@ func main() {
 
 func taskJob() {
 	initJob()
-	apincIpList := parseChinaIpFromApinc()
+	apincIPList := parseChinaIPFromApinc()
 	ipipList := openIpipFile()
-	finalIpList := mergeSliceWithOutDuplicate(ipipList, apincIpList)
-	file, err := os.OpenFile(OutPutFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	finalIPList := mergeSliceWithOutDuplicate(ipipList, apincIPList)
+	file, err := os.OpenFile(outPutFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	defer file.Close()
 	if err != nil {
 		log.Fatalf("failed creating file: %s", err)
@@ -39,7 +39,7 @@ func taskJob() {
 
 	dataWriter := bufio.NewWriter(file)
 
-	for _, data := range finalIpList {
+	for _, data := range finalIPList {
 		_, _ = dataWriter.WriteString(data + "\n")
 	}
 
@@ -63,11 +63,11 @@ func taskJob() {
 }
 
 func initJob() {
-	os.Remove(OutPutFile)
-	os.Remove(IpipIpListFile)
-	os.Remove(ApincIpListFile)
-	downloadFile(IpipIpListFile, IpipUrl)
-	downloadFile(ApincIpListFile, ApnicUrl)
+	os.Remove(outPutFile)
+	os.Remove(ipipIPListFile)
+	os.Remove(apincIPListFile)
+	downloadFile(ipipIPListFile, ipipURL)
+	downloadFile(apincIPListFile, apnicURL)
 }
 
 func mergeSliceWithOutDuplicate(a []string, b []string) []string {
@@ -79,7 +79,7 @@ func mergeSliceWithOutDuplicate(a []string, b []string) []string {
 		check[val] = 1
 	}
 
-	for letter, _ := range check {
+	for letter := range check {
 		res = append(res, letter)
 	}
 
@@ -87,7 +87,7 @@ func mergeSliceWithOutDuplicate(a []string, b []string) []string {
 }
 
 func openIpipFile() []string {
-	f, err := os.Open(IpipIpListFile)
+	f, err := os.Open(ipipIPListFile)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -105,8 +105,8 @@ func openIpipFile() []string {
 	return ipList
 }
 
-func parseChinaIpFromApinc() []string {
-	f, err := os.Open(ApincIpListFile)
+func parseChinaIPFromApinc() []string {
+	f, err := os.Open(apincIPListFile)
 	if err != nil {
 		log.Fatal(err)
 	}
