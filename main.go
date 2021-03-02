@@ -23,7 +23,7 @@ const OutPutFile = "china_ip_list.txt"
 func main() {
 	s := gocron.NewScheduler(time.UTC)
 	_, _ = s.Every("1").Days().At("00:01:00").Do(taskJob)
-	s.StartAsync()
+	s.StartBlocking()
 }
 
 func taskJob() {
