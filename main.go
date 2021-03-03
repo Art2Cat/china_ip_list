@@ -5,6 +5,7 @@ import (
 	"github.com/go-co-op/gocron"
 	log "github.com/sirupsen/logrus"
 	"io"
+	"fmt"
 
 	"math"
 	"net/http"
@@ -28,13 +29,18 @@ func main() {
 }
 
 func init() {
+
 	// Log as JSON instead of the default ASCII formatter.
 	log.SetFormatter(&log.JSONFormatter{})
 
 	// Output to stdout instead of the default stderr
 	// Can be any io.Writer, see below for File example
-	log.SetOutput(os.Stdout)
-
+	// log.SetOutput(os.Stdout)
+	var file, err = os.OpenFile("./error.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		fmt.Println("Could Not Open Log File : " + err.Error())
+	}
+	log.SetOutput(file)
 	// Only log the warning severity or above.
 	log.SetLevel(log.WarnLevel)
 }
