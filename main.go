@@ -3,8 +3,9 @@ package main
 import (
 	"bufio"
 	"github.com/go-co-op/gocron"
+	log "github.com/sirupsen/logrus"
 	"io"
-	"log"
+
 	"math"
 	"net/http"
 	"os"
@@ -24,6 +25,18 @@ func main() {
 	s := gocron.NewScheduler(time.UTC)
 	_, _ = s.Every("1").Days().At("01:00:00").Do(taskJob)
 	s.StartBlocking()
+}
+
+func init() {
+	// Log as JSON instead of the default ASCII formatter.
+	log.SetFormatter(&log.JSONFormatter{})
+
+	// Output to stdout instead of the default stderr
+	// Can be any io.Writer, see below for File example
+	log.SetOutput(os.Stdout)
+
+	// Only log the warning severity or above.
+	log.SetLevel(log.WarnLevel)
 }
 
 func taskJob() {
@@ -47,18 +60,18 @@ func taskJob() {
 	cmd := exec.Command("git", "add", "china_ip_list.txt")
 	err = cmd.Run()
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 
 	cmd = exec.Command("git", "commit", "-m", "'update china_ip_list.txt'")
 	err = cmd.Run()
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 	cmd = exec.Command("git", "push")
 	err = cmd.Run()
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 }
 
