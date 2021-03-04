@@ -59,6 +59,7 @@ func taskJob() {
 	}
 
 	dataWriter.Flush()
+
 	cmd := exec.Command("git", "add", "china_ip_list.txt")
 	err = cmd.Run()
 	if err != nil {
@@ -78,6 +79,10 @@ func taskJob() {
 }
 
 func initJob() {
+	err := os.Chdir("./china_ip_list")
+	if err != nil {
+		log.Fatal(err)
+	}
 	os.Remove(outPutFile)
 	os.Remove(ipipIPListFile)
 	os.Remove(apincIPListFile)
