@@ -18,3 +18,4 @@ apinc_ip_list.txt
 ip_list.txt
 
 .idea
+*.log

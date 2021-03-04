@@ -2,10 +2,9 @@ package main
 
 import (
 	"bufio"
-	"github.com/go-co-op/gocron"
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	"io"
-	"fmt"
 
 	"math"
 	"net/http"
@@ -13,19 +12,16 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
-	"time"
 )
 
 const apnicURL = "http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest"
-const apincIPListFile = "apinc_ip_list.txt"
+const apincIPListFile = "./apinc_ip_list.txt"
 const ipipURL = "https://raw.githubusercontent.com/17mon/china_ip_list/master/china_ip_list.txt"
-const ipipIPListFile = "ip_list.txt"
-const outPutFile = "china_ip_list.txt"
+const ipipIPListFile = "./ip_list.txt"
+const outPutFile = "./china_ip_list.txt"
 
 func main() {
-	s := gocron.NewScheduler(time.UTC)
-	_, _ = s.Every("1").Days().At("01:00:00").Do(taskJob)
-	s.StartBlocking()
+	taskJob()
 }
 
 func init() {
@@ -36,7 +32,7 @@ func init() {
 	// Output to stdout instead of the default stderr
 	// Can be any io.Writer, see below for File example
 	// log.SetOutput(os.Stdout)
-	var file, err = os.OpenFile("/tmp/error.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	var file, err = os.OpenFile("./error.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		fmt.Println("Could Not Open Log File : " + err.Error())
 	}
