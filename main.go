@@ -44,37 +44,42 @@ func init() {
 func taskJob() {
 	initJob()
 	apincIPList := parseChinaIPFromApinc()
-	ipipList := openIpipFile()
+	ipipList := openIpFile(ipipIPListFile)
 	finalIPList := mergeSliceWithOutDuplicate(ipipList, apincIPList)
-	file, err := os.OpenFile(outPutFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	defer file.Close()
-	if err != nil {
-		log.Fatalf("failed creating file: %s", err)
-	}
+	originIpList := openIpFile(outPutFile)
+	if !equal(originIpList, finalIPList) {
+		os.Remove(outPutFile)
 
-	dataWriter := bufio.NewWriter(file)
+		file, err := os.OpenFile(outPutFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		defer file.Close()
+		if err != nil {
+			log.Fatalf("failed creating file: %s", err)
+		}
 
-	for _, data := range finalIPList {
-		_, _ = dataWriter.WriteString(data + "\n")
-	}
+		dataWriter := bufio.NewWriter(file)
 
-	dataWriter.Flush()
+		for _, data := range finalIPList {
+			_, _ = dataWriter.WriteString(data + "\n")
+		}
 
-	cmd := exec.Command("git", "add", "china_ip_list.txt")
-	err = cmd.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
+		dataWriter.Flush()
 
-	cmd = exec.Command("git", "commit", "-m", "'update china_ip_list.txt'")
-	err = cmd.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
-	cmd = exec.Command("git", "push")
-	err = cmd.Run()
-	if err != nil {
-		log.Fatal(err)
+		cmd := exec.Command("git", "add", "china_ip_list.txt")
+		err = cmd.Run()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		cmd = exec.Command("git", "commit", "-m", "'update china_ip_list.txt'")
+		err = cmd.Run()
+		if err != nil {
+			log.Fatal(err)
+		}
+		cmd = exec.Command("git", "push")
+		err = cmd.Run()
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
@@ -83,7 +88,6 @@ func initJob() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	os.Remove(outPutFile)
 	os.Remove(ipipIPListFile)
 	os.Remove(apincIPListFile)
 	downloadFile(ipipIPListFile, ipipURL)
@@ -106,8 +110,8 @@ func mergeSliceWithOutDuplicate(a []string, b []string) []string {
 	return res
 }
 
-func openIpipFile() []string {
-	f, err := os.Open(ipipIPListFile)
+func openIpFile(path string) []string {
+	f, err := os.Open(path)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -181,4 +185,18 @@ func downloadFile(filepath string, url string) (err error) {
 		log.Panic(err)
 	}
 	return
+}
+
+// Equal tells whether a and b contain the same elements.
+// A nil argument is equivalent to an empty slice.
+func equal(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i, v := range a {
+		if v != b[i] {
+			return false
+		}
+	}
+	return true
 }
