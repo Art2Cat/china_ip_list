@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -47,6 +48,8 @@ func taskJob() {
 	ipipList := openIpFile(ipipIPListFile)
 	finalIPList := mergeSliceWithOutDuplicate(ipipList, apincIPList)
 	originIpList := openIpFile(outPutFile)
+	sort.Strings(finalIPList)
+	sort.Strings(originIpList)
 	if !equal(originIpList, finalIPList) {
 		os.Remove(outPutFile)
 
@@ -111,12 +114,13 @@ func mergeSliceWithOutDuplicate(a []string, b []string) []string {
 }
 
 func openIpFile(path string) []string {
+	ipList := make([]string, 0)
 	f, err := os.Open(path)
 	if err != nil {
-		log.Fatal(err)
+		return ipList
 	}
 	r4 := bufio.NewReader(f)
-	ipList := make([]string, 0)
+
 	for {
 		line, _, err := r4.ReadLine()
 
