@@ -5,6 +5,7 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"io"
+	"sync"
 
 	"math"
 	"net/http"
@@ -20,6 +21,8 @@ const apincIPListFile = "./apinc_ip_list.txt"
 const ipipURL = "https://raw.githubusercontent.com/17mon/china_ip_list/master/china_ip_list.txt"
 const ipipIPListFile = "./ip_list.txt"
 const outPutFile = "./china_ip_list.txt"
+
+var wg sync.WaitGroup
 
 func main() {
 	taskJob()
@@ -54,10 +57,10 @@ func taskJob() {
 		os.Remove(outPutFile)
 
 		file, err := os.OpenFile(outPutFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		defer file.Close()
 		if err != nil {
 			log.Fatalf("failed creating file: %s", err)
 		}
+		defer file.Close()
 
 		dataWriter := bufio.NewWriter(file)
 
@@ -93,8 +96,10 @@ func initJob() {
 	}
 	os.Remove(ipipIPListFile)
 	os.Remove(apincIPListFile)
-	downloadFile(ipipIPListFile, ipipURL)
-	downloadFile(apincIPListFile, apnicURL)
+	wg.Add(2)
+	go downloadFile(ipipIPListFile, ipipURL)
+	go downloadFile(apincIPListFile, apnicURL)
+	wg.Wait()
 }
 
 func mergeSliceWithOutDuplicate(a []string, b []string) []string {
@@ -159,7 +164,8 @@ func parseChinaIPFromApinc() []string {
 	return ipList
 }
 
-func downloadFile(filepath string, url string) (err error) {
+func downloadFile(filepath string, url string) {
+	defer wg.Done()
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Panic(err)
@@ -179,7 +185,7 @@ func downloadFile(filepath string, url string) (err error) {
 	defer func() {
 		e := out.Close()
 		if e != nil {
-			err = e
+			log.Panic(e)
 		}
 	}()
 
@@ -188,7 +194,6 @@ func downloadFile(filepath string, url string) (err error) {
 	if err != nil {
 		log.Panic(err)
 	}
-	return
 }
 
 // Equal tells whether a and b contain the same elements.
